@@ -1,0 +1,36 @@
+#include "mbed.h"
+
+// create objects for LED and serial communication
+DigitalOut myled(LED1);
+Serial pc(USBRX, USBTX);  // USB serial port for PC communication
+Serial dev(p9, p10);  // serial port for device communication
+
+// function to receive data from device and send it to PC
+void dev_recv() {
+    while(dev.readable()) {  // loop while there is data to read from device
+        pc.putc(dev.getc());  // send the data to PC
+    }    
+}
+
+// function to receive data from PC and send it to device
+void pc_recv() {
+    while(pc.readable()) {  // loop while there is data to read from PC
+        dev.putc(pc.getc());  // send the data to the device
+    }    
+}
+
+int main() {
+    pc.baud(9600);  // set baud rate for PC communication
+    dev.baud(115200);  // set baud rate for device communication
+    pc.attach(&pc_recv);  // attach the PC receive function to the PC serial port
+    dev.attach(&dev_recv);  // attach the device receive function to the device serial port
+    pc.printf("Hello!! \r\n");  // send a message to PC
+    
+    // loop to blink the LED
+    while(1) {
+        myled = 1;  // turn on the LED
+        wait(1);  // wait for 1 second
+        myled = 0;  // turn off the LED
+        wait(1);  // wait for 1 second
+    }
+}
